@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playwright Automation with MCP & OpenRouter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .config-info {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .config-info h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .config-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .prompt-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .prompt-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .prompt-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .execute-btn {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .execute-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .execute-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.loading {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #2196f3;
+            display: block;
+        }
+
+        .status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+            display: block;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+            display: block;
+        }
+
+        .results-section {
+            margin-top: 30px;
+        }
+
+        .interpretation-section {
+            background: #e8f4f8;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+            display: none;
+        }
+
+        .interpretation-section h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .actions-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .actions-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .action-status {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .action-success {
+            color: #4caf50;
+        }
+
+        .action-error {
+            color: #f44336;
+        }
+
+        .action-description {
+            flex: 1;
+            color: #333;
+        }
+
+        .action-error-msg {
+            color: #f44336;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .screenshot-container {
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px dashed #dee2e6;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .screenshot-placeholder {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .screenshot-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot-container img:hover {
+            transform: scale(1.02);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .example-prompts {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .example-prompts h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .example-prompt {
+            background: white;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .example-prompt:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .health-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .health-healthy {
+            color: #4caf50;
+        }
+
+        .health-unhealthy {
+            color: #f44336;
+        }
+
+        @media (max-width: 768px) {
+            .prompt-container {
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .health-indicator {
+                position: static;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="health-indicator" id="healthIndicator">
+        🔄 Checking system...
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎭 Playwright Automation</h1>
+            <p>Natural language browser automation with MCP & OpenRouter</p>
+        </div>
+
+        <div class="config-info" id="configInfo" style="display: none;">
+            <h3>🤖 System Information</h3>
+            <p id="modelInfo">Model: Loading...</p>
+            <p id="mcpInfo">MCP Server: Loading...</p>
+        </div>
+
+        <div class="input-section">
+            <div class="prompt-container">
+                <input 
+                    type="text" 
+                    id="promptInput" 
+                    class="prompt-input" 
+                    placeholder="Enter your automation prompt (e.g., 'go to google.com and search for cats')"
+                >
+                <button id="executeBtn" class="execute-btn">Execute</button>
+            </div>
+
+            <div id="status" class="status"></div>
+        </div>
+
+        <div class="results-section">
+            <div id="interpretationSection" class="interpretation-section">
+                <h3>🧠 AI Interpretation</h3>
+                <p id="interpretationText"></p>
+            </div>
+
+            <div id="actionsSection" class="actions-section">
+                <h3>⚡ Executed Actions</h3>
+                <div id="actionsList"></div>
+            </div>
+
+            <div id="screenshotContainer" class="screenshot-container">
+                <div class="screenshot-placeholder">
+                    📸 Screenshot will appear here after execution
+                </div>
+            </div>
+        </div>
+
+        <div class="example-prompts">
+            <h3>💡 Example Prompts:</h3>
+            <div class="example-prompt" onclick="setPrompt('navigate to google.com and search for artificial intelligence')">
+                Navigate to Google and search for "artificial intelligence"
+            </div>
+            <div class="example-prompt" onclick="setPrompt('go to github.com and click on the sign up button')">
+                Go to GitHub and click on the sign up button
+            </div>
+            <div class="example-prompt" onclick="setPrompt('open wikipedia.org, search for playwright, and take a screenshot')">
+                Open Wikipedia, search for "playwright", and take a screenshot
+            </div>
+            <div class="example-prompt" onclick="setPrompt('navigate to amazon.com and click on the search box')">
+                Navigate to Amazon and click on the search box
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const promptInput = document.getElementById('promptInput');
+        const executeBtn = document.getElementById('executeBtn');
+        const status = document.getElementById('status');
+        const screenshotContainer = document.getElementById('screenshotContainer');
+        const interpretationSection = document.getElementById('interpretationSection');
+        const interpretationText = document.getElementById('interpretationText');
+        const actionsSection = document.getElementById('actionsSection');
+        const actionsList = document.getElementById('actionsList');
+        const healthIndicator = document.getElementById('healthIndicator');
+        const configInfo = document.getElementById('configInfo');
+        const modelInfo = document.getElementById('modelInfo');
+        const mcpInfo = document.getElementById('mcpInfo');
+
+        let isExecuting = false;
+
+        function setPrompt(prompt) {
+            promptInput.value = prompt;
+            promptInput.focus();
+        }
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        function hideStatus() {
+            status.style.display = 'none';
+        }
+
+        function showLoading() {
+            screenshotContainer.innerHTML = `
+                <div class="loading-spinner"></div>
+                <div class="screenshot-placeholder">🤖 AI is interpreting your prompt and executing automation...</div>
+            `;
+        }
+
+        function showScreenshot(imagePath) {
+            const timestamp = new Date().getTime();
+            screenshotContainer.innerHTML = `
+                <img src="${imagePath}?t=${timestamp}" alt="Automation Result" onclick="window.open(this.src, '_blank')">
+                <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">📸 Click image to view full size</p>
+            `;
+        }
+
+        function showError(message) {
+            screenshotContainer.innerHTML = `
+                <div class="screenshot-placeholder" style="color: #dc3545;">
+                    ❌ ${message}
+                </div>
+            `;
+        }
+
+        function showInterpretation(interpretation) {
+            interpretationText.textContent = interpretation;
+            interpretationSection.style.display = 'block';
+        }
+
+        function showActions(actions) {
+            actionsList.innerHTML = '';
+            actions.forEach(action => {
+                const actionDiv = document.createElement('div');
+                actionDiv.className = 'action-item';
+                
+                const statusIcon = action.success ? '✅' : '❌';
+                const statusClass = action.success ? 'action-success' : 'action-error';
+                
+                actionDiv.innerHTML = `
+                    <span class="action-status ${statusClass}">${statusIcon}</span>
+                    <div class="action-description">
+                        ${action.description}
+                        ${action.error ? `<div class="action-error-msg">Error: ${action.error}</div>` : ''}
+                    </div>
+                `;
+                
+                actionsList.appendChild(actionDiv);
+            });
+            actionsSection.style.display = 'block';
+        }
+
+        async function checkHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const health = await response.json();
+                
+                if (response.ok && health.status === 'healthy') {
+                    healthIndicator.innerHTML = '🟢 System Healthy';
+                    healthIndicator.className = 'health-indicator health-healthy';
+                    
+                    // Show config info
+                    modelInfo.textContent = `Model: ${health.config.model}`;
+                    mcpInfo.textContent = `MCP Server: ${health.config.mcp_server_url}`;
+                    configInfo.style.display = 'block';
+                } else {
+                    healthIndicator.innerHTML = '🔴 System Issues';
+                    healthIndicator.className = 'health-indicator health-unhealthy';
+                }
+            } catch (error) {
+                healthIndicator.innerHTML = '🔴 Connection Error';
+                healthIndicator.className = 'health-indicator health-unhealthy';
+            }
+        }
+
+        async function executeAutomation() {
+            const prompt = promptInput.value.trim();
+            
+            if (!prompt) {
+                showStatus('Please enter a prompt', 'error');
+                return;
+            }
+
+            if (isExecuting) {
+                return;
+            }
+
+            isExecuting = true;
+            executeBtn.disabled = true;
+            executeBtn.textContent = 'Executing...';
+            
+            // Hide previous results
+            interpretationSection.style.display = 'none';
+            actionsSection.style.display = 'none';
+            
+            showStatus('🤖 AI is interpreting your prompt...', 'loading');
+            showLoading();
+
+            try {
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus(`✅ Automation completed successfully! (${result.execution_count} actions executed)`, 'success');
+                    
+                    // Show interpretation
+                    if (result.interpretation) {
+                        showInterpretation(result.interpretation);
+                    }
+                    
+                    // Show actions
+                    if (result.actions && result.actions.length > 0) {
+                        showActions(result.actions);
+                    }
+                    
+                    // Show screenshot
+                    if (result.screenshot) {
+                        showScreenshot(result.screenshot);
+                    } else if (result.screenshot_saved) {
+                        screenshotContainer.innerHTML = `
+                            <div class="screenshot-placeholder" style="color: #28a745;">
+                                📸 Screenshot saved successfully but not available for display
+                            </div>
+                        `;
+                    } else {
+                        screenshotContainer.innerHTML = `
+                            <div class="screenshot-placeholder">
+                                ✅ Automation completed successfully
+                            </div>
+                        `;
+                    }
+                } else {
+                    throw new Error(result.error || 'Automation failed');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                showError('Automation failed. Please check the console for details.');
+            } finally {
+                isExecuting = false;
+                executeBtn.disabled = false;
+                executeBtn.textContent = 'Execute';
+            }
+        }
+
+        // Event listeners
+        executeBtn.addEventListener('click', executeAutomation);
+
+        promptInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !isExecuting) {
+                executeAutomation();
+            }
+        });
+
+        // Initialize
+        window.addEventListener('load', () => {
+            promptInput.focus();
+            checkHealth();
+            
+            // Check health every 30 seconds
+            setInterval(checkHealth, 30000);
+        });
+    </script>
+</body>
+</html>
