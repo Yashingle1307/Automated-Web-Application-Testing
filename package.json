@@ -5,10 +5,14 @@
   "description": "Playwright automation with MCP and Ollama integration",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --inspect server.js"
+    "start": "concurrently \"node server.js\" \"set PYTHONIOENCODING=utf-8 && python app.py\"",
+    "start:server": "node server.js",
+    "start:client": "python app.py",
+    "dev": "concurrently \"node --inspect server.js\" \"python app.py\"",
+    "install:python": "pip install -r requirements.txt"
   },
   "dependencies": {
+    "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "node-fetch": "^3.3.2",
