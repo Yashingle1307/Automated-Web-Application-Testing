@@ -35,7 +35,7 @@ def check_dependencies():
         missing_deps.append("click")
     
     if missing_deps:
-        print(f"❌ Missing Python dependencies: {', '.join(missing_deps)}")
+        print(f"Missing Python dependencies: {', '.join(missing_deps)}")
         print("Please install them with: pip install " + " ".join(missing_deps))
         return False
     
@@ -60,15 +60,15 @@ def start_mcp_server():
             subprocess.run(['node', '--version'], check=True, capture_output=True)
             subprocess.run([sys.executable, "main.py", "start-server"], check=True)
         except subprocess.CalledProcessError as e:
-            print(f"❌ MCP server failed to start: {e}")
+            print(f"MCP server failed to start: {e}")
         except FileNotFoundError:
-            print("❌ Node.js not found. Please install Node.js to run the MCP server")
+            print("Node.js not found. Please install Node.js to run the MCP server")
         except KeyboardInterrupt:
-            print("\n🛑 MCP server stopped")
+            print("\nMCP server stopped")
         except Exception as e:
-            print(f"❌ Unexpected error starting server: {e}")
+            print(f"Unexpected error starting server: {e}")
     
-    print("\n🚀 Starting MCP server...")
+    print("\nStarting MCP server...")
     server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()
     

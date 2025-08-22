@@ -57,7 +57,7 @@ def execute_automation():
                 'error': 'Prompt cannot be empty'
             }), 400
         
-        print(f"🚀 Executing prompt: {prompt}")
+        print(f"Executing prompt: {prompt}")
         
         # Get orchestrator and execute
         orch = get_orchestrator()

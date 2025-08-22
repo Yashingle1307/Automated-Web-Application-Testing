@@ -57,6 +57,7 @@ def cli():
 @click.option('--interactive', '-i', is_flag=True, help='Start interactive mode')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.option('--no-screenshot', is_flag=True, help='Disable automatic final screenshot')
+
 def run(api_key, model, mcp_server, prompt, interactive, verbose, no_screenshot):
     """Execute Playwright automation based on natural language prompts"""
     
